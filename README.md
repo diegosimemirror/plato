@@ -1,4 +1,4 @@
-# Proyecto Platón
+# Navegador de textos: Platón
 
 Corpus bilingüe (griego e inglés) de las obras de Platón, tomado de Perseus Digital Library,
 y herramientas para estudiarlo.
@@ -15,9 +15,9 @@ y herramientas para estudiarlo.
 | `scripts/arete.py` | Primer prototipo: concordancia de ἀρετή → `web/arete.html` |
 | `scripts/halfwassen.py` | Índice del libro de Halfwassen (segmentos, citas de Platón, densidad de términos) → `web/halfwassen_datos.js` |
 | `scripts/concordancia.py` | Concordancia de ἀρετή, ἕν y νοῦς con remisiones y ecos → `web/concordancia_datos.js` |
-| `web/concordancia.html` | **Carruseles platónicos**: diálogos en horizontal y el libro de Halfwassen en vertical |
+| `web/concordancia.html` | **Navegador de textos: Platón**: diálogos en horizontal y el libro de Halfwassen en vertical |
 
-## Ver los carruseles
+## Ver el navegador
 
 - **En la web:** https://diegosimemirror.github.io/plato/ (GitHub Pages, una vez activado).
 - **En tu computadora:** abrir `web/concordancia.html` con doble clic.
