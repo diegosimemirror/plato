@@ -422,7 +422,7 @@ mark { background: var(--accent-soft); color: var(--fg); border-bottom: 2px soli
       html += `<span>Halfwassen: <b>${fmt(L.citas.length)}</b> citas de Platón en <b>${Object.keys(CITA_PAG).length}</b> páginas · <b>${fmt(dTot)}</b> menciones del concepto en alemán</span>`;
     }
     $("cifras").innerHTML = html;
-    $("etqLentes").textContent = `Lente: ¿con qué aparece ${T.info.griego}?`;
+    $("etqLentes").innerHTML = `Lente: ¿con qué aparece <span style="text-transform:none;font-family:var(--font-greek);font-size:14px">${T.info.griego}</span>?`;
     const nTodas = Object.values(D.pasajes).filter(p => p.k[T.ti] > 0).length;
     $("lentes").innerHTML = [`<button type="button" class="ficha" data-l="" aria-pressed="${!estado.lente}">Todas <span class="n">${nTodas}</span></button>`]
       .concat(Object.entries(T.info.lentes).map(([k, t]) =>
