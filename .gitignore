@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+
+# Libros con derechos reservados: nunca en el repositorio
+*.pdf
+datos/privado/
+# Ruta local al PDF (se genera con scripts/halfwassen.py)
+web/config_local.js

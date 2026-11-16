@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carruseles platónicos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif:wght@400;600&display=swap">
+<style>
+/* Diseño: dos ejes de lectura. En horizontal, los 36 diálogos como «carruseles» Stephanus;
+   en vertical, a la derecha, el libro de Halfwassen como carrusel de páginas. Las curvas unen
+   pasajes de Platón entre sí (remisiones, ecos) y con las páginas del intérprete (citas). */
+:root {
+  --bg: #F4F6F9;
+  --surface: #FFFFFF;
+  --fg: #1A2130;
+  --muted: #5A6375;
+  --line: #DCE1E8;
+  --track: #E3E7ED;
+  --track2: #D2D8E1;
+  --accent: #1F55A5;
+  --accent-soft: #DCE6F5;
+  --remision: #6A3FA0;
+  --eco: #A86400;
+  --libro: #0E7A70;
+  --libro-soft: #D5EEEA;
+  --mark-dim: #B3BAC6;
+  --font-greek: "GFS Didot", "Noto Serif", "Palatino Linotype", "Palatino", serif;
+  --font-text: "Noto Serif", Georgia, "Times New Roman", serif;
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10141B; --surface: #171C25; --fg: #E5E9F0; --muted: #9AA3B3; --line: #29303C;
+    --track: #252C38; --track2: #323A48; --accent: #74A3EA; --accent-soft: #1E2E48;
+    --remision: #B79BE8; --eco: #E2A443; --libro: #41C4B6; --libro-soft: #133B37;
+    --mark-dim: #4A5364; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10141B; --surface: #171C25; --fg: #E5E9F0; --muted: #9AA3B3; --line: #29303C;
+  --track: #252C38; --track2: #323A48; --accent: #74A3EA; --accent-soft: #1E2E48;
+  --remision: #B79BE8; --eco: #E2A443; --libro: #41C4B6; --libro-soft: #133B37;
+  --mark-dim: #4A5364; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 48px;
+}
+.marco { max-width: 1320px; margin: 0 auto; display: grid; gap: 20px; }
+button, select { font: inherit; color: inherit; }
+a { color: var(--accent); }
+button:focus-visible, select:focus-visible, summary:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header { display: grid; gap: 8px; }
+.ceja { font-family: var(--font-data); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-size: clamp(26px, 4vw, 36px); font-weight: 600; line-height: 1.15; text-wrap: balance; }
+.intro { max-width: 78ch; margin: 0; color: var(--muted); }
+
+/* Selector de término */
+.terminos { display: flex; flex-wrap: wrap; gap: 8px; }
+.termino {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 6px; padding: 8px 14px; cursor: pointer;
+  display: grid; gap: 0; text-align: left; min-width: 150px;
+}
+.termino .gr { font-family: var(--font-greek); font-size: 26px; line-height: 1.1; }
+.termino .gl { font-size: 13px; color: var(--muted); }
+.termino .cf { font-family: var(--font-data); font-size: 11.5px; color: var(--muted); }
+.termino[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.termino[aria-pressed="true"] .gr { color: var(--accent); }
+.cifras { display: flex; flex-wrap: wrap; gap: 4px 18px; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; }
+.cifras b { color: var(--fg); font-weight: 600; }
+
+.controles { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-start; }
+.grupo-ctl { display: grid; gap: 6px; min-width: 0; }
+.etq { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.fichas { display: flex; flex-wrap: wrap; gap: 6px; }
+.ficha {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 3px 11px;
+  font-size: 13px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center;
+}
+.ficha[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.ficha .n { font-family: var(--font-data); font-size: 11px; opacity: .75; }
+.interruptor { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; cursor: pointer; }
+.muestra { width: 22px; height: 0; border-top: 2px solid var(--remision); display: inline-block; }
+.muestra.eco { border-top: 2px dashed var(--eco); }
+.muestra.libro { border-top: 2px solid var(--libro); }
+
+/* Mapa */
+.mapa { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 12px 8px; position: relative; }
+.mapa svg { display: block; width: 100%; height: auto; cursor: pointer; user-select: none; }
+.mapa text { font-family: var(--font-ui); fill: var(--fg); }
+.mapa .grp { font-family: var(--font-data); font-size: 10.5px; letter-spacing: .08em; fill: var(--muted); text-transform: uppercase; }
+.mapa .lbl { font-size: 12.5px; }
+.mapa .lbl.vacio, .mapa .num.vacio { fill: var(--mark-dim); }
+.mapa .num { font-family: var(--font-data); font-size: 11px; fill: var(--muted); }
+.mapa .pista { fill: var(--track); }
+.mapa .marca { fill: var(--accent); }
+.mapa .marca.apagada { fill: var(--mark-dim); }
+.mapa .citada { fill: var(--libro); }
+.mapa .sel { fill: none; stroke: var(--fg); stroke-width: 2; }
+.mapa .lin { fill: none; stroke-width: 1.6; pointer-events: none; }
+.mapa .lin.remision { stroke: var(--remision); }
+.mapa .lin.eco { stroke: var(--eco); stroke-dasharray: 5 4; }
+.mapa .lin.libro { stroke: var(--libro); stroke-width: 1.3; opacity: .85; }
+.mapa .lin.realce { stroke-width: 3; opacity: 1; }
+.mapa .destino { fill: var(--surface); stroke-width: 2; }
+.mapa .destino.remision { stroke: var(--remision); }
+.mapa .destino.eco { stroke: var(--eco); }
+.mapa .destino.libro { stroke: var(--libro); }
+.mapa .cap { fill: var(--track); }
+.mapa .cap.par { fill: var(--track2); }
+.mapa .par-sep { stroke: var(--surface); stroke-width: 1; }
+.mapa .dens { fill: var(--accent); }
+.mapa .cita-l { fill: var(--libro); }
+.mapa .cap-lbl { font-size: 11.5px; fill: var(--muted); }
+.mapa .cap-lbl tspan.r { font-family: var(--font-data); font-weight: 500; fill: var(--fg); }
+.mapa .titulo-libro { font-family: var(--font-data); font-size: 10.5px; letter-spacing: .08em; fill: var(--libro); text-transform: uppercase; }
+.mapa .seg-sel { fill: none; stroke: var(--fg); stroke-width: 2; }
+.leyenda { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--muted); padding: 8px 2px 2px; }
+.leyenda span { display: inline-flex; gap: 6px; align-items: center; }
+.cuadro { width: 10px; height: 12px; background: var(--accent); display: inline-block; border-radius: 1px; }
+.cuadro.libro { background: var(--libro); height: 4px; }
+.globo {
+  position: absolute; pointer-events: none; background: var(--fg); color: var(--bg); font-size: 12.5px;
+  padding: 4px 8px; border-radius: 4px; white-space: nowrap; transform: translate(-50%, -130%); max-width: 90vw; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Lector */
+.lector { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 390px); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .lector { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.panel.es-libro { border-top: 3px solid var(--libro); }
+.cab { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; justify-content: space-between; }
+.cab h2 { margin: 0; font-size: 22px; font-weight: 600; text-wrap: balance; }
+.cab h2 .steph { font-family: var(--font-data); font-weight: 500; color: var(--accent); margin-left: 6px; }
+.cab .k { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.cab .k .gr-in { font-family: var(--font-greek); font-size: 16px; color: var(--fg); }
+.ruta { font-family: var(--font-data); font-size: 12px; color: var(--libro); letter-spacing: .04em; }
+.titulo-de { font-family: var(--font-text); font-size: 17px; margin: 0; text-wrap: balance; }
+.glosa { margin: 0; color: var(--muted); font-size: 14px; }
+.navs { display: grid; gap: 6px; }
+.nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13.5px; }
+.nav .que { color: var(--muted); min-width: 0; }
+.btn {
+  border: 1px solid var(--line); background: var(--bg); border-radius: 4px; padding: 3px 10px; cursor: pointer;
+  font-size: 13px; display: inline-flex; gap: 6px; align-items: center; text-decoration: none; color: var(--fg);
+}
+.btn:hover:not(:disabled) { border-color: var(--accent); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn .steph { font-family: var(--font-data); }
+.btn.libro { border-color: var(--libro); color: var(--libro); }
+.textos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 700px) { .textos { grid-template-columns: minmax(0, 1fr); } }
+.texto { display: grid; gap: 6px; min-width: 0; align-content: start; }
+.texto .etq { font-weight: 500; }
+.gr { font-family: var(--font-greek); font-size: 18px; line-height: 1.65; margin: 0; overflow-wrap: anywhere; }
+.en { font-family: var(--font-text); font-size: 15px; line-height: 1.7; margin: 0; overflow-wrap: anywhere; }
+mark { background: var(--accent-soft); color: var(--fg); border-bottom: 2px solid var(--accent); padding: 0 1px; }
+.en mark { border-bottom-style: dotted; }
+.hablante { font-family: var(--font-data); font-size: 11px; letter-spacing: .05em; color: var(--muted); margin-right: 4px; }
+.aviso { font-size: 13.5px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; margin: 0; }
+.densidades { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.densidades b { color: var(--fg); }
+.paginas { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.pagina { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; align-items: start; border-top: 1px solid var(--line); padding-top: 8px; }
+.pagina .np { font-family: var(--font-data); font-size: 12.5px; color: var(--libro); padding-top: 3px; }
+.pagina .np a { color: inherit; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--bg); border-radius: 4px; padding: 2px 8px; font-size: 13px; cursor: pointer; display: inline-flex; gap: 6px; align-items: baseline; }
+.chip:hover { border-color: var(--libro); }
+.chip .steph { font-family: var(--font-data); color: var(--accent); }
+.chip .tk { font-family: var(--font-greek); font-size: 13px; color: var(--accent); }
+
+.lateral { display: grid; gap: 16px; min-width: 0; }
+.caja { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.caja.libro { border-left: 3px solid var(--libro); }
+.caja h3 { margin: 0; font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.caja h3 .n { font-family: var(--font-data); font-weight: 400; color: var(--muted); }
+.lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.puente {
+  border: 1px solid var(--line); border-left: 3px solid var(--remision); border-radius: 4px; padding: 8px 10px;
+  display: grid; gap: 4px; cursor: pointer; background: var(--surface); text-align: left; width: 100%;
+}
+.puente.eco { border-left: 3px dashed var(--eco); }
+.puente.libro { border-left: 3px solid var(--libro); }
+.puente:hover, .puente:focus-visible { border-color: var(--accent); }
+.puente .dest { font-weight: 600; font-size: 14px; }
+.puente .dest .steph { font-family: var(--font-data); font-weight: 500; color: var(--accent); }
+.puente .dir { font-size: 12px; color: var(--muted); }
+.puente .nota { font-family: var(--font-text); font-size: 13px; line-height: 1.5; color: var(--fg); overflow-wrap: anywhere; }
+.puente .nota.gram { color: var(--muted); }
+.palabras { display: flex; flex-wrap: wrap; gap: 4px; }
+.palabras span { font-family: var(--font-greek); font-size: 15px; background: var(--bg); border: 1px solid var(--line); border-radius: 3px; padding: 0 6px; }
+.vacio-msg { font-size: 13.5px; color: var(--muted); margin: 0; }
+.barras { display: grid; gap: 4px; }
+.barra { display: grid; grid-template-columns: 110px minmax(0, 1fr) 28px; gap: 8px; align-items: center; font-size: 13px; }
+.barra .b { height: 8px; background: var(--libro); border-radius: 2px; }
+.barra .v { font-family: var(--font-data); font-size: 12px; color: var(--muted); text-align: right; }
+.recorrido { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.recorrido .paso { font-size: 12.5px; padding: 2px 8px; }
+.recorrido .paso.l { border-color: var(--libro); }
+.recorrido .paso.actual { border-color: var(--accent); color: var(--accent); }
+.recorrido .flecha { color: var(--muted); font-size: 12px; }
+
+.metodo { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 18px; }
+.metodo summary { cursor: pointer; font-weight: 600; }
+.metodo .cuerpo { display: grid; gap: 8px; max-width: 82ch; padding-top: 8px; font-size: 14px; }
+.metodo p { margin: 0; }
+.metodo ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.metodo code { font-family: var(--font-data); font-size: 12.5px; }
+.metodo .gr-in { font-family: var(--font-greek); font-size: 15px; }
+@media (prefers-reduced-motion: no-preference) { .puente, .btn, .ficha, .chip, .termino { transition: border-color .15s, background .15s; } }
+</style>
+</head>
+<body>
+<div class="marco">
+  <header>
+    <div class="ceja">Proyecto Platón · concordancia</div>
+    <h1>Carruseles platónicos</h1>
+    <p class="intro">En horizontal, cada barra es un diálogo de Platón según la paginación de Stephanus; las marcas azules son las secciones donde aparece el término elegido, y las curvas violetas y ocres unen pasajes de distintos diálogos. A la derecha, la barra vertical es el libro de Halfwassen, de la primera a la última página: el azul muestra dónde trata el mismo concepto en alemán y las marcas verdes, dónde cita a Platón. Elige un pasaje o una página del libro para ver sus conexiones.</p>
+    <div class="terminos" id="terminos" role="group" aria-label="Término de la concordancia"></div>
+    <div class="cifras" id="cifras"></div>
+  </header>
+
+  <section class="controles" aria-label="Controles del mapa">
+    <div class="grupo-ctl">
+      <label class="etq" for="orden">Orden de los diálogos</label>
+      <select id="orden">
+        <option value="trasilo">Tetralogías de Trasilo</option>
+        <option value="crono">Cronología convencional (aproximada)</option>
+      </select>
+    </div>
+    <div class="grupo-ctl">
+      <span class="etq">Conexiones</span>
+      <div class="fichas">
+        <label class="interruptor"><input type="checkbox" id="verRem" checked> <span class="muestra"></span> Remisiones de los traductores</label>
+        <label class="interruptor"><input type="checkbox" id="verEco" checked> <span class="muestra eco"></span> Ecos de vocabulario</label>
+        <label class="interruptor" id="ctlLibro"><input type="checkbox" id="verLibro" checked> <span class="muestra libro"></span> Citas de Halfwassen</label>
+      </div>
+    </div>
+    <div class="grupo-ctl" style="flex-basis:100%">
+      <span class="etq" id="etqLentes">Lente</span>
+      <div class="fichas" id="lentes"></div>
+    </div>
+  </section>
+
+  <section class="mapa" id="mapa" aria-label="Mapa de los diálogos y del libro">
+    <svg id="svg" role="img" aria-label="Diálogos de Platón en horizontal y libro de Halfwassen en vertical, con sus conexiones"></svg>
+    <div class="leyenda">
+      <span><i class="cuadro"></i> el término elegido (más intenso, más apariciones)</span>
+      <span><i class="cuadro libro"></i> sección citada por Halfwassen</span>
+      <span><i class="muestra"></i> remisión</span>
+      <span><i class="muestra eco"></i> eco</span>
+      <span><i class="muestra libro"></i> cita del libro</span>
+      <span>Flechas ← →: anterior o siguiente</span>
+    </div>
+    <div class="globo" id="globo" hidden></div>
+  </section>
+
+  <section class="lector">
+    <article class="panel" id="panel" aria-live="polite"></article>
+    <aside class="lateral">
+      <div class="caja" id="cajaA"></div>
+      <div class="caja libro" id="cajaB"></div>
+      <div class="caja">
+        <h3>Tu recorrido <button class="btn" id="limpiar" type="button">Empezar de nuevo</button></h3>
+        <div class="recorrido" id="recorrido"></div>
+      </div>
+    </aside>
+  </section>
+
+  <details class="metodo">
+    <summary>Cómo se armó</summary>
+    <div class="cuerpo">
+      <p><b>Textos de Platón.</b> Griego de Burnet (Oxford) e inglés Loeb (Fowler, Lamb, Shorey, Bury), de Perseus Digital Library, alineados por sección Stephanus. CC BY-SA 4.0, © Perseus Digital Library, Tufts University.</p>
+      <p><b>Términos.</b> Se cuentan formas sin distinguir acentos: <span class="gr-in">ἀρετή</span> (todas las del sustantivo); <span class="gr-in">ἕν, ἑνός, ἑνί</span> conservando el espíritu áspero para no confundirlas con la preposición <span class="gr-in">ἐν</span> (no se cuentan <span class="gr-in">εἷς, μία</span>); <span class="gr-in">νοῦς, νοῦ, νῷ, νοῦν</span> (incluye la expresión <span class="gr-in">νοῦν ἔχειν</span>, «tener sensatez»).</p>
+      <ul>
+        <li><b>Remisiones.</b> Pasajes que los traductores Loeb citan en sus notas; se muestran bajo un término si alguno de sus extremos lo contiene. La mayoría proviene de las notas de Shorey a la <i>República</i>.</li>
+        <li><b>Ecos.</b> Cálculo automático entre pasajes con el término en diálogos distintos: similitud coseno TF-IDF sobre raíces aproximadas (sin lematizador), umbral 0,10, hasta tres por pasaje.</li>
+        <li><b>Libro de Halfwassen.</b> Las citas de Platón se leen en el texto del PDF (abreviaturas alemanas como <code>Politeia 509 B</code>, <code>Parm. 137 C ff</code>, <code>Ep. VII 341 CD</code>) y se validan contra las secciones Stephanus existentes; los rangos cortos (hasta 12 secciones) se expanden y se descartan las referencias al comentario de Proclo («In Parm.»). La densidad del libro cuenta «Tugend/Arete», «das/des/dem … Eine(n)» y «Nous» por página. El texto del libro no se copia: la página guarda solo el índice, las páginas y las referencias. Para leer, pulsa «Vincular mi PDF del libro» y elige tu ejemplar; se abre en la página indicada desde tu propio navegador y no se sube a ningún sitio.</li>
+        <li><b>Cronología.</b> La agrupación en tempranos, medios y tardíos es convencional y discutida.</li>
+      </ul>
+      <p>Los puentes calculados son pistas para la lectura; la interpretación sigue siendo del lector.</p>
+    </div>
+  </details>
+</div>
+
+<input type="file" id="pdfArchivo" accept="application/pdf" hidden>
+<script src="concordancia_datos.js"></script>
+<script src="halfwassen_datos.js"></script>
+<script src="config_local.js"></script>
+<script>
+(function () {
+  const D = window.DATOS, L = window.LIBRO || null;
+  const TETRA = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
+  const $ = id => document.getElementById(id);
+  const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const fmt = n => n.toLocaleString("es-PE");
+  const partes = k => { const i = k.indexOf(":"); return [Number(k.slice(0, i)), k.slice(i + 1)]; };
+  const clave = w => {
+    const d = w.toLowerCase().normalize("NFD");
+    return (d.includes("̔") ? "h" : "") + d.replace(/[̀-ͯ]/g, "").replace(/ς/g, "σ");
+  };
+
+  // Índices fijos
+  const OBRA = {};
+  D.obras.forEach(o => { OBRA[o.n] = o; o.idx = new Map(o.secciones.map((s, i) => [s, i])); });
+  const nombre = k => { const [n, s] = partes(k); return OBRA[n].es + " " + s; };
+  const obraDe = k => OBRA[partes(k)[0]].es;
+  const secDe = k => partes(k)[1];
+
+  // Libro: citas, segmentos y hojas
+  const CITA_SEC = {}, CITA_PAG = {};
+  let HOJAS = [];
+  if (L) {
+    L.citas.forEach(c => {
+      (CITA_SEC[c.s] = CITA_SEC[c.s] || []).push(c.p);
+      (CITA_PAG[c.p] = CITA_PAG[c.p] || []).push(c.s);
+    });
+    L.segmentos.forEach((s, i) => {
+      const sig = L.segmentos[i + 1];
+      s.i = i;
+      s.hoja = !sig || sig.nivel <= s.nivel;
+    });
+    HOJAS = L.segmentos.filter(s => s.hoja);
+  }
+  const segDePagina = p => {
+    let mejor = null;
+    if (!L) return null;
+    L.segmentos.forEach(s => { if (s.ini <= p && p <= s.fin && (!mejor || s.nivel >= mejor.nivel)) mejor = s; });
+    return mejor;
+  };
+  const rutaSeg = s => {
+    const cad = [];
+    for (let i = s.i; i >= 0; i--) {
+      const x = L.segmentos[i];
+      if (x.nivel < (cad.length ? cad[cad.length - 1].nivel : 99)) cad.push(x);
+      if (x.nivel === 1) break;
+    }
+    return cad.reverse();
+  };
+  const capDe = s => rutaSeg(s)[0];
+  // PDF del libro: en tu computadora, config_local.js trae su ruta; en la web, el lector elige su
+  // ejemplar con «Vincular mi PDF» y el archivo se abre desde su propio navegador (no se sube).
+  let pdfBlob = null;
+  const pdfBase = () => window.PDF_LOCAL || pdfBlob;
+  const pdfEn = p => (L && pdfBase() ? `${pdfBase()}#page=${p + L.desfase}` : null);
+  const enlacePag = p => { const u = pdfEn(p); return u ? `<a href="${u}" target="_blank" rel="noopener">p. ${p}</a>` : `p. ${p}`; };
+  const botonPdf = p => {
+    const u = pdfEn(p);
+    return u ? `<a class="btn libro" href="${u}" target="_blank" rel="noopener">Abrir el PDF en la p. ${p}</a>`
+             : `<label class="btn libro" for="pdfArchivo" style="cursor:pointer">Vincular mi PDF del libro</label>`;
+  };
+  $("pdfArchivo").addEventListener("change", e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    if (pdfBlob) URL.revokeObjectURL(pdfBlob);
+    pdfBlob = URL.createObjectURL(f);
+    render();
+  });
+
+  // Estado
+  const estado = { t: "hen", sel: { tipo: "p", k: "9:137c" }, lente: null, orden: "trasilo",
+                   verRem: true, verEco: true, verLibro: !!L, recorrido: [] };
+  let T = null, geo = null;
+
+  // Datos derivados del término elegido
+  function prepararTermino() {
+    const ti = D.orden.indexOf(estado.t), info = D.terminos[estado.t];
+    const formas = new Set(info.formas);
+    const marcas = {};
+    D.obras.forEach(o => { marcas[o.n] = o.secciones.filter(s => { const p = D.pasajes[o.n + ":" + s]; return p && p.k[ti] > 0; }); });
+    const puentes = {};
+    D.puentes.forEach(p => {
+      if (!p.t.includes(estado.t)) return;
+      (puentes[p.de] = puentes[p.de] || []).push(Object.assign({}, p, { otro: p.a, dir: "sale" }));
+      (puentes[p.a] = puentes[p.a] || []).push(Object.assign({}, p, { otro: p.de, dir: "entra" }));
+    });
+    const lentesCuenta = {};
+    Object.values(D.pasajes).forEach(p => ((p.l && p.l[estado.t]) || []).forEach(l => (lentesCuenta[l] = (lentesCuenta[l] || 0) + 1)));
+    const dens = (L && L.densidad[estado.t]) || {};
+    const maxDens = Math.max(1, ...Object.values(dens));
+    T = { ti, info, formas, marcas, puentes, lentesCuenta, dens, maxDens, re: new RegExp(info.ingles, "gi") };
+  }
+  const k_ = k => (D.pasajes[k] ? D.pasajes[k].k[T.ti] : 0);
+
+  function grupos() {
+    if (estado.orden === "crono") return Object.entries(D.grupos).map(([g, obras]) => ({ g, obras }));
+    return TETRA.map((t, i) => ({ g: "Tetralogía " + t, obras: [1, 2, 3, 4].map(j => i * 4 + j) }));
+  }
+  function itinerario() {
+    const lista = [];
+    grupos().forEach(gr => gr.obras.forEach(n => T.marcas[n].forEach(s => {
+      const k = n + ":" + s;
+      if (!estado.lente || ((D.pasajes[k].l || {})[estado.t] || []).includes(estado.lente)) lista.push(k);
+    })));
+    return lista;
+  }
+  const puentesVisibles = k => (T.puentes[k] || []).filter(p => (p.tipo === "remision" ? estado.verRem : estado.verEco));
+
+  // Encabezado: términos, cifras y lentes
+  function dibujarTerminos() {
+    $("terminos").innerHTML = D.orden.map((t, i) => {
+      const info = D.terminos[t], tot = D.obras.reduce((a, o) => a + o.k[i], 0);
+      return `<button type="button" class="termino" data-t="${t}" aria-pressed="${t === estado.t}"><span class="gr">${info.griego}</span><span class="gl">${esc(info.glosa)}</span><span class="cf">${fmt(tot)} apariciones</span></button>`;
+    }).join("");
+    const tot = D.obras.reduce((a, o) => a + o.k[T.ti], 0);
+    const nP = Object.values(D.pasajes).filter(p => p.k[T.ti] > 0).length;
+    const nO = D.obras.filter(o => o.k[T.ti] > 0).length;
+    const nR = D.puentes.filter(p => p.tipo === "remision" && p.t.includes(estado.t)).length;
+    const nE = D.puentes.filter(p => p.tipo === "eco" && p.t.includes(estado.t)).length;
+    let html = `<span><b>${fmt(tot)}</b> apariciones de <span style="font-family:var(--font-greek)">${T.info.griego}</span></span><span><b>${fmt(nP)}</b> secciones</span><span><b>${nO}</b> de 36 diálogos</span><span><b>${fmt(nR)}</b> remisiones</span><span><b>${fmt(nE)}</b> ecos</span>`;
+    if (L) {
+      const dTot = Object.values(T.dens).reduce((a, b) => a + b, 0);
+      html += `<span>Halfwassen: <b>${fmt(L.citas.length)}</b> citas de Platón en <b>${Object.keys(CITA_PAG).length}</b> páginas · <b>${fmt(dTot)}</b> menciones del concepto en alemán</span>`;
+    }
+    $("cifras").innerHTML = html;
+    $("etqLentes").textContent = `Lente: ¿con qué aparece ${T.info.griego}?`;
+    const nTodas = Object.values(D.pasajes).filter(p => p.k[T.ti] > 0).length;
+    $("lentes").innerHTML = [`<button type="button" class="ficha" data-l="" aria-pressed="${!estado.lente}">Todas <span class="n">${nTodas}</span></button>`]
+      .concat(Object.entries(T.info.lentes).map(([k, t]) =>
+        `<button type="button" class="ficha" data-l="${k}" aria-pressed="${estado.lente === k}">${esc(t)} <span class="n">${T.lentesCuenta[k] || 0}</span></button>`)).join("");
+    $("ctlLibro").hidden = !L;
+  }
+
+  // Mapa
+  function dibujarMapa() {
+    const svg = $("svg");
+    const W = svg.parentElement.clientWidth - 24;
+    const angosto = W < 720;
+    const labelW = angosto ? 84 : 150, numW = 30;
+    const libroW = L ? (angosto ? 58 : 210) : 0;
+    const barX = labelW + 10, barW = Math.max(100, W - barX - numW - 8 - libroW);
+    const rowH = angosto ? 19 : 21, grpH = 24, pistaH = 8, marcaH = 14;
+    const filas = {}, out = [];
+    const itinSet = estado.lente ? new Set(itinerario()) : null;
+    const xDe = k => { const [n, s] = partes(k), o = OBRA[n]; return barX + (o.idx.get(s) + 0.5) / o.secciones.length * barW; };
+    let y = 4;
+    grupos().forEach(gr => {
+      y += grpH;
+      out.push(`<text class="grp" x="0" y="${y - 7}">${gr.g}</text>`);
+      gr.obras.forEach(n => {
+        const o = OBRA[n], cy = y + rowH / 2, kk = o.k[T.ti];
+        filas[n] = cy;
+        const vacio = kk === 0 ? " vacio" : "";
+        let nom = o.es;
+        if (angosto && nom.length > 12) nom = nom.slice(0, 11) + "…";
+        out.push(`<text class="lbl${vacio}" x="${labelW}" y="${cy + 4}" text-anchor="end">${nom}</text>`);
+        out.push(`<rect class="pista" x="${barX}" y="${cy - pistaH / 2}" width="${barW}" height="${pistaH}" rx="2"></rect>`);
+        const len = o.secciones.length, w = Math.max(2, barW / len);
+        T.marcas[n].forEach(s => {
+          const k = n + ":" + s, c = k_(k), x = barX + (o.idx.get(s) + 0.5) / len * barW;
+          const apag = itinSet && !itinSet.has(k) ? " apagada" : "";
+          const op = c >= 3 ? 1 : c === 2 ? 0.8 : 0.58;
+          out.push(`<rect class="marca${apag}" x="${(x - w / 2).toFixed(1)}" y="${cy - marcaH / 2}" width="${w.toFixed(1)}" height="${marcaH}" opacity="${apag ? 1 : op}"></rect>`);
+        });
+        if (L && estado.verLibro) {
+          o.secciones.forEach((s, i) => {
+            if (!CITA_SEC[n + ":" + s]) return;
+            const x = barX + (i + 0.5) / len * barW;
+            out.push(`<rect class="citada" x="${(x - Math.max(1.5, w / 2)).toFixed(1)}" y="${cy + marcaH / 2 + 1}" width="${Math.max(3, w).toFixed(1)}" height="3"></rect>`);
+          });
+        }
+        out.push(`<text class="num${vacio}" x="${barX + barW + 6}" y="${cy + 4}">${kk}</text>`);
+        y += rowH;
+      });
+    });
+    const H = y + 8;
+
+    // Carrusel vertical del libro
+    let bx = 0, yTop = 0, yBot = 0, yDe = () => 0;
+    if (L) {
+      bx = W - libroW + (angosto ? 10 : 14);
+      yTop = 4 + grpH + 2; yBot = H - 10;
+      const [P0, P1] = L.paginas, alto = (yBot - yTop) / (P1 - P0 + 1);
+      yDe = p => yTop + (p - P0 + 0.5) * alto;
+      out.push(`<text class="titulo-libro" x="${bx - 2}" y="${yTop - 10}">${angosto ? "Halfw." : "Halfwassen 1999"}</text>`);
+      let par = false;
+      L.segmentos.filter(s => s.nivel === 1).forEach(s => {
+        const y0 = yTop + (s.ini - P0) * alto, y1 = yTop + (s.fin - P0 + 1) * alto;
+        out.push(`<rect class="cap${par ? " par" : ""}" x="${bx}" y="${y0.toFixed(1)}" width="14" height="${(y1 - y0).toFixed(1)}"></rect>`);
+        par = !par;
+        const ym = (y0 + y1) / 2 + 4;
+        if (angosto) out.push(`<text class="cap-lbl" x="${bx + 20}" y="${ym.toFixed(1)}"><tspan class="r">${s.etq}</tspan></text>`);
+        else out.push(`<text class="cap-lbl" x="${bx + 30}" y="${ym.toFixed(1)}"><tspan class="r">${s.etq}</tspan> ${esc(s.glosa.length > 26 ? s.glosa.slice(0, 25) + "…" : s.glosa)}</text>`);
+      });
+      L.segmentos.filter(s => s.nivel === 2).forEach(s => {
+        const y0 = yTop + (s.ini - P0) * alto;
+        out.push(`<line class="par-sep" x1="${bx}" x2="${bx + 14}" y1="${y0.toFixed(1)}" y2="${y0.toFixed(1)}"></line>`);
+      });
+      Object.entries(T.dens).forEach(([p, c]) => {
+        const yy = yTop + (Number(p) - P0) * alto;
+        out.push(`<rect class="dens" x="${bx + 2}" y="${yy.toFixed(1)}" width="10" height="${Math.max(1.2, alto).toFixed(1)}" opacity="${(0.25 + 0.75 * c / T.maxDens).toFixed(2)}"></rect>`);
+      });
+      Object.entries(CITA_PAG).forEach(([p, lista]) => {
+        const yy = yDe(Number(p));
+        out.push(`<rect class="cita-l" x="${bx + 16}" y="${(yy - 1).toFixed(1)}" width="${Math.min(10, 3 + lista.length).toFixed(1)}" height="2.2"></rect>`);
+      });
+    }
+
+    // Conexiones de la selección
+    const destinos = [];
+    if (estado.sel.tipo === "p") {
+      const k = estado.sel.k, [ns] = partes(k), x1 = xDe(k), y1 = filas[ns];
+      puentesVisibles(k).forEach((p, i) => {
+        const [n2] = partes(p.otro), x2 = xDe(p.otro), y2 = filas[n2];
+        let d;
+        if (n2 === ns) {
+          const a = Math.min(40, 14 + Math.abs(x2 - x1) / 6);
+          d = `M${x1.toFixed(1)} ${y1} C${x1.toFixed(1)} ${y1 - a} ${x2.toFixed(1)} ${y2 - a} ${x2.toFixed(1)} ${y2}`;
+        } else {
+          const ym = (y1 + y2) / 2;
+          d = `M${x1.toFixed(1)} ${y1} C${x1.toFixed(1)} ${ym} ${x2.toFixed(1)} ${ym} ${x2.toFixed(1)} ${y2}`;
+        }
+        out.push(`<path class="lin ${p.tipo}" data-i="p${i}" d="${d}"></path>`);
+        destinos.push({ k: p.otro, x: x2, y: y2, tipo: p.tipo });
+      });
+      if (L && estado.verLibro) {
+        [...new Set(CITA_SEC[k] || [])].forEach(p => {
+          const y2 = yDe(p), x2 = bx;
+          out.push(`<path class="lin libro" data-i="l${p}" d="M${x1.toFixed(1)} ${y1} C${((x1 + x2) / 2).toFixed(1)} ${y1} ${((x1 + x2) / 2).toFixed(1)} ${y2.toFixed(1)} ${x2} ${y2.toFixed(1)}"></path>`);
+          destinos.push({ pag: p, x: x2, y: y2, tipo: "libro" });
+        });
+      }
+      destinos.forEach(t => out.push(`<circle class="destino ${t.tipo}" cx="${t.x.toFixed(1)}" cy="${t.y.toFixed(1)}" r="4"></circle>`));
+      out.push(`<rect class="sel" x="${(x1 - 5).toFixed(1)}" y="${y1 - 11}" width="10" height="22" rx="2"></rect>`);
+    } else if (L) {
+      const s = L.segmentos[estado.sel.seg];
+      const [P0, P1] = L.paginas, alto = (yBot - yTop) / (P1 - P0 + 1);
+      const y0 = yTop + (s.ini - P0) * alto, y1 = yTop + (s.fin - P0 + 1) * alto;
+      for (let p = s.ini; p <= s.fin; p++) {
+        (CITA_PAG[p] || []).forEach(k => {
+          if (!estado.verLibro) return;
+          const [n2] = partes(k), x2 = xDe(k), y2 = filas[n2], yy = yDe(p);
+          out.push(`<path class="lin libro" data-i="c${k}" d="M${bx} ${yy.toFixed(1)} C${((bx + x2) / 2).toFixed(1)} ${yy.toFixed(1)} ${((bx + x2) / 2).toFixed(1)} ${y2} ${x2.toFixed(1)} ${y2}"></path>`);
+          destinos.push({ k, x: x2, y: y2, tipo: "libro" });
+        });
+      }
+      destinos.forEach(t => out.push(`<circle class="destino ${t.tipo}" cx="${t.x.toFixed(1)}" cy="${t.y.toFixed(1)}" r="4"></circle>`));
+      out.push(`<rect class="seg-sel" x="${bx - 3}" y="${y0.toFixed(1)}" width="20" height="${Math.max(3, y1 - y0).toFixed(1)}" rx="2"></rect>`);
+      if (estado.sel.p) {
+        const yy = yDe(estado.sel.p);
+        out.push(`<rect class="sel" x="${bx - 5}" y="${(yy - 2).toFixed(1)}" width="24" height="4" rx="1"></rect>`);
+      }
+    }
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.setAttribute("width", W);
+    svg.setAttribute("height", H);
+    svg.innerHTML = out.join("");
+    geo = { W, barX, barW, rowH, filas, destinos, bx, yTop, yBot };
+  }
+
+  function buscarEn(ev) {
+    if (!geo) return null;
+    const r = $("svg").getBoundingClientRect(), f = geo.W / r.width;
+    const x = (ev.clientX - r.left) * f, y = (ev.clientY - r.top) * f;
+    for (const t of geo.destinos) if (Math.hypot(t.x - x, t.y - y) < 9) return t.k ? { tipo: "p", k: t.k } : { tipo: "l", p: t.pag };
+    if (L && x >= geo.bx - 6 && x <= geo.bx + 30 && y >= geo.yTop && y <= geo.yBot) {
+      const [P0, P1] = L.paginas;
+      const p = Math.max(P0, Math.min(P1, Math.floor(P0 + (y - geo.yTop) / (geo.yBot - geo.yTop) * (P1 - P0 + 1))));
+      return { tipo: "l", p };
+    }
+    let fila = null;
+    for (const [n, cy] of Object.entries(geo.filas)) if (Math.abs(cy - y) <= geo.rowH / 2) fila = Number(n);
+    if (fila === null || x < geo.barX - 6 || x > geo.barX + geo.barW + 6) return null;
+    const o = OBRA[fila], cand = new Set(T.marcas[fila]);
+    if (L && estado.verLibro) o.secciones.forEach(s => { if (CITA_SEC[fila + ":" + s]) cand.add(s); });
+    let mejor = null, dist = 14;
+    cand.forEach(s => {
+      const d = Math.abs(geo.barX + (o.idx.get(s) + 0.5) / o.secciones.length * geo.barW - x);
+      if (d < dist) { dist = d; mejor = fila + ":" + s; }
+    });
+    return mejor ? { tipo: "p", k: mejor } : null;
+  }
+  $("svg").addEventListener("click", ev => { const h = buscarEn(ev); if (h) h.tipo === "p" ? irP(h.k) : irL(h.p); });
+  $("svg").addEventListener("mousemove", ev => {
+    const h = buscarEn(ev), g = $("globo");
+    if (!h) { g.hidden = true; return; }
+    if (h.tipo === "p") {
+      const c = k_(h.k), citas = (CITA_SEC[h.k] || []).length;
+      g.textContent = nombre(h.k) + ` · ${T.info.griego}: ${c}` + (citas ? ` · citado por Halfwassen (${citas})` : "");
+    } else {
+      const s = segDePagina(h.p), c = (CITA_PAG[h.p] || []).length;
+      g.textContent = `Halfwassen p. ${h.p} · ${s ? rutaSeg(s).map(x => x.etq).join(" ") : ""}` + (c ? ` · ${c} ${c === 1 ? "cita" : "citas"} de Platón` : "");
+    }
+    const r = $("mapa").getBoundingClientRect();
+    g.style.left = Math.min(r.width - 120, Math.max(120, ev.clientX - r.left)) + "px";
+    g.style.top = (ev.clientY - r.top) + "px";
+    g.hidden = false;
+  });
+  $("svg").addEventListener("mouseleave", () => ($("globo").hidden = true));
+
+  // Panel de pasaje
+  const griego = t => esc(t).replace(/\[([^\]]+)\]/g, '<span class="hablante">$1</span>')
+    .replace(/[Ͱ-Ͽἀ-῿]+/g, w => (T.formas.has(clave(w)) ? `<mark>${w}</mark>` : w));
+  const ingles = t => esc(t).replace(/\[([^\]]+)\]/g, '<span class="hablante">$1</span>').replace(T.re, "<mark>$1</mark>");
+  function botonPaso(k, etiqueta, lado) {
+    if (!k) return `<button class="btn" type="button" disabled>${lado === "izq" ? "◀" : "▶"}</button>`;
+    return `<button class="btn" type="button" data-ir="${k}">${lado === "izq" ? "◀ " : ""}${etiqueta}${lado === "der" ? " ▶" : ""}</button>`;
+  }
+  function vecinos(k) {
+    const [n, s] = partes(k), o = OBRA[n], lista = T.marcas[n], pos = o.idx.get(s);
+    const antes = lista.filter(x => o.idx.get(x) < pos), despues = lista.filter(x => o.idx.get(x) > pos);
+    const i = lista.indexOf(s);
+    return { prev: antes.length ? n + ":" + antes[antes.length - 1] : null, next: despues.length ? n + ":" + despues[0] : null, pos: i >= 0 ? i + 1 : null, tot: lista.length };
+  }
+  function panelPasaje() {
+    const k = estado.sel.k, [n, s] = partes(k), o = OBRA[n], p = D.pasajes[k], c = k_(k);
+    const v = vecinos(k);
+    let navs = `<div class="nav"><span class="que">Obra por obra · ${esc(o.es)}${v.pos ? ` (${v.pos} de ${v.tot})` : ""}</span>${botonPaso(v.prev, v.prev ? `<span class="steph">${secDe(v.prev)}</span>` : "", "izq")}${botonPaso(v.next, v.next ? `<span class="steph">${secDe(v.next)}</span>` : "", "der")}</div>`;
+    if (estado.lente) {
+      const it = itinerario(), j = it.indexOf(k);
+      const et = x => `${esc(obraDe(x))} <span class="steph">${secDe(x)}</span>`;
+      navs += `<div class="nav"><span class="que">Rayuela por «${esc(T.info.lentes[estado.lente])}»${j >= 0 ? ` (${j + 1} de ${it.length})` : ""}</span>` +
+        botonPaso(j > 0 ? it[j - 1] : null, j > 0 ? et(it[j - 1]) : "", "izq") + botonPaso(j >= 0 && j < it.length - 1 ? it[j + 1] : null, j >= 0 && j < it.length - 1 ? et(it[j + 1]) : "", "der") + `</div>`;
+    }
+    const lentes = ((p.l || {})[estado.t] || []);
+    const fichas = lentes.length ? `<div class="fichas">${lentes.map(l => `<span class="ficha" style="cursor:default">${esc(T.info.lentes[l])}</span>`).join("")}</div>` : "";
+    const otros = D.orden.map((t, i) => (t !== estado.t && p.k[i] ? `${D.terminos[t].griego} ${p.k[i]}` : "")).filter(Boolean);
+    const aviso = c === 0 ? `<p class="aviso">Esta sección no contiene ${T.info.griego}${otros.length ? ` (sí: ${otros.join(", ")})` : ""}. Llegaste por una conexión.</p>` : "";
+    $("panel").className = "panel";
+    $("panel").innerHTML =
+      `<div class="cab"><h2>${esc(o.es)}<span class="steph">${esc(s)}</span></h2>` +
+      `<span class="k"><span class="gr-in">${T.info.griego}</span>: ${c}${otros.length && c ? ` · ${otros.join(" · ")}` : ""}</span></div>` +
+      `<div class="navs">${navs}</div>${fichas}${aviso}` +
+      `<div class="textos"><div class="texto" lang="grc"><span class="etq">Griego · Burnet</span><p class="gr">${griego(p.gr)}</p></div>` +
+      `<div class="texto" lang="en"><span class="etq">Inglés · Loeb</span><p class="en">${p.en ? ingles(p.en) : "<i>Sin traducción para esta sección.</i>"}</p></div></div>`;
+  }
+  function cajaPuentes() {
+    const k = estado.sel.k;
+    const gram = t => /^[Ͱ-Ͽἀ-῿]/.test(t);
+    const lista = puentesVisibles(k).map((p, i) => Object.assign({ i }, p));
+    lista.sort((a, b) => (a.tipo !== b.tipo ? (a.tipo === "remision" ? -1 : 1) : a.tipo === "remision" ? gram(a.nota) - gram(b.nota) : b.fuerza - a.fuerza));
+    const items = lista.map(p => {
+      const dest = `${esc(obraDe(p.otro))} <span class="steph">${esc(secDe(p.otro))}</span>`;
+      if (p.tipo === "remision") {
+        const dir = p.dir === "sale" ? "La nota de este pasaje remite a" : "Una nota en ese pasaje remite aquí";
+        const nota = p.nota.length > 260 ? p.nota.slice(0, 257) + "…" : p.nota;
+        return `<li><button type="button" class="puente" data-ir="${p.otro}" data-i="p${p.i}"><span class="dir">${dir}</span><span class="dest">${dest}</span><span class="nota${gram(p.nota) ? " gram" : ""}">${esc(nota)}</span></button></li>`;
+      }
+      return `<li><button type="button" class="puente eco" data-ir="${p.otro}" data-i="p${p.i}"><span class="dir">Eco de vocabulario · fuerza ${p.fuerza.toFixed(2).replace(".", ",")}</span><span class="dest">${dest}</span><span class="palabras">${p.palabras.map(w => `<span>${esc(w)}</span>`).join("")}</span></button></li>`;
+    });
+    $("cajaA").innerHTML = `<h3>Conexiones dentro de Platón <span class="n">${lista.length}</span></h3>` +
+      (items.length ? `<ul class="lista">${items.join("")}</ul>` : `<p class="vacio-msg">Sin remisiones ni ecos para ${T.info.griego} en este pasaje con los filtros actuales.</p>`);
+  }
+  function cajaLibroDePasaje() {
+    if (!L) { $("cajaB").hidden = true; return; }
+    $("cajaB").hidden = false;
+    const k = estado.sel.k, [n, s] = partes(k), o = OBRA[n];
+    const pags = [...new Set(CITA_SEC[k] || [])].sort((a, b) => a - b);
+    const i = o.idx.get(s), cerca = [];
+    for (let d = -2; d <= 2; d++) {
+      const s2 = o.secciones[i + d];
+      if (d && s2 && CITA_SEC[n + ":" + s2]) cerca.push(n + ":" + s2);
+    }
+    let html = `<h3>Halfwassen <span class="n">${pags.length ? pags.length + (pags.length === 1 ? " página" : " páginas") : ""}</span></h3>`;
+    if (pags.length) {
+      html += `<ul class="lista">${pags.map(p => {
+        const sg = segDePagina(p);
+        return `<li><button type="button" class="puente libro" data-pag="${p}" data-i="l${p}"><span class="dir">Cita este pasaje en la p. ${p}</span><span class="dest">${esc(rutaSeg(sg).map(x => x.etq).join(" · "))}</span><span class="nota">${esc(sg.titulo)}</span></button></li>`;
+      }).join("")}</ul>`;
+    } else {
+      html += `<p class="vacio-msg">Halfwassen no cita esta sección.</p>`;
+    }
+    if (cerca.length) html += `<p class="vacio-msg">Cita secciones vecinas: ${cerca.map(x => `<button type="button" class="chip" data-ir="${x}"><span class="steph">${secDe(x)}</span></button>`).join(" ")}</p>`;
+    $("cajaB").innerHTML = html;
+  }
+
+  // Panel del libro
+  function panelLibro() {
+    const s = L.segmentos[estado.sel.seg], ruta = rutaSeg(s), cap = ruta[0];
+    const h = HOJAS.indexOf(s);
+    const ant = h > 0 ? HOJAS[h - 1] : null, sig = h >= 0 && h < HOJAS.length - 1 ? HOJAS[h + 1] : null;
+    const et = x => esc(rutaSeg(x).map(y => y.etq).join(" "));
+    const dens = D.orden.map(t => {
+      let c = 0;
+      for (let p = s.ini; p <= s.fin; p++) c += (L.densidad[t] || {})[p] || 0;
+      return `<span>${t === "arete" ? "Tugend/Arete" : t === "hen" ? "das Eine" : "Nous"}: <b>${c}</b></span>`;
+    }).join("");
+    const pags = [];
+    for (let p = s.ini; p <= s.fin; p++) if (CITA_PAG[p]) pags.push(p);
+    const lista = pags.map(p => `<li class="pagina"><span class="np">${enlacePag(p)}</span><span class="chips">${[...new Set(CITA_PAG[p])].map(k => {
+      const c = k_(k);
+      return `<button type="button" class="chip" data-ir="${k}">${esc(obraDe(k))} <span class="steph">${secDe(k)}</span>${c ? ` <span class="tk">${T.info.griego} ${c}</span>` : ""}</button>`;
+    }).join("")}</span></li>`).join("");
+    const pAbrir = estado.sel.p || s.ini;
+    $("panel").className = "panel es-libro";
+    $("panel").innerHTML =
+      `<div class="ruta">Halfwassen · ${esc(ruta.map(x => x.etq).join(" · "))} · pp. ${s.ini}–${s.fin}</div>` +
+      `<div class="cab"><h2>${esc(cap.etq === "Einl." || cap.etq === "R" ? cap.titulo : "Kapitel " + cap.etq)}</h2>${botonPdf(pAbrir)}</div>` +
+      (cap.glosa ? `<p class="glosa">${esc(cap.glosa)}</p>` : "") +
+      (s !== cap ? `<p class="titulo-de" lang="de">${esc(s.titulo)}</p>` : `<p class="titulo-de" lang="de">${esc(cap.titulo)}</p>`) +
+      `<div class="nav"><span class="que">Libro en orden</span>${ant ? `<button class="btn" type="button" data-seg="${ant.i}">◀ ${et(ant)}</button>` : `<button class="btn" type="button" disabled>◀</button>`}${sig ? `<button class="btn" type="button" data-seg="${sig.i}">${et(sig)} ▶</button>` : `<button class="btn" type="button" disabled>▶</button>`}</div>` +
+      `<div class="densidades">Menciones en este segmento: ${dens}</div>` +
+      (pags.length ? `<ul class="paginas">${lista}</ul>` : `<p class="vacio-msg">En este segmento Halfwassen no cita pasajes de Platón por número de Stephanus.</p>`);
+  }
+  function cajasLibro() {
+    const s = L.segmentos[estado.sel.seg];
+    const cuenta = {};
+    for (let p = s.ini; p <= s.fin; p++) (CITA_PAG[p] || []).forEach(k => { const o = obraDe(k); cuenta[o] = (cuenta[o] || 0) + 1; });
+    const filas = Object.entries(cuenta).sort((a, b) => b[1] - a[1]);
+    const max = filas.length ? filas[0][1] : 1;
+    $("cajaA").innerHTML = `<h3>Diálogos citados en el segmento <span class="n">${filas.reduce((a, f) => a + f[1], 0)}</span></h3>` +
+      (filas.length ? `<div class="barras">${filas.map(([o, c]) => `<div class="barra"><span>${esc(o)}</span><span class="b" style="width:${(100 * c / max).toFixed(0)}%"></span><span class="v">${c}</span></div>`).join("")}</div>` : `<p class="vacio-msg">Sin citas en este segmento.</p>`);
+    $("cajaB").hidden = false;
+    $("cajaB").innerHTML = `<h3>Cómo leer este eje</h3><p class="vacio-msg">Las líneas verdes van de las páginas de este segmento a los pasajes que cita. Elige un pasaje para leerlo en griego y en inglés y ver qué otras páginas del libro lo citan.</p>`;
+  }
+
+  function dibujarRecorrido() {
+    $("recorrido").innerHTML = estado.recorrido.map((r, i) => {
+      const actual = (r.tipo === "p" && estado.sel.tipo === "p" && r.k === estado.sel.k) || (r.tipo === "l" && estado.sel.tipo === "l" && r.p === estado.sel.p);
+      const btn = r.tipo === "p"
+        ? `<button type="button" class="btn paso${actual ? " actual" : ""}" data-ir="${r.k}">${esc(nombre(r.k))}</button>`
+        : `<button type="button" class="btn paso l${actual ? " actual" : ""}" data-pag="${r.p}">Halfwassen p. ${r.p}</button>`;
+      return (i ? `<span class="flecha">→</span>` : "") + btn;
+    }).join("");
+  }
+
+  function render() {
+    prepararTermino();
+    dibujarTerminos();
+    dibujarMapa();
+    if (estado.sel.tipo === "p") { panelPasaje(); cajaPuentes(); cajaLibroDePasaje(); }
+    else { panelLibro(); cajasLibro(); }
+    dibujarRecorrido();
+  }
+  function anotar(paso) {
+    const u = estado.recorrido[estado.recorrido.length - 1];
+    if (!u || u.tipo !== paso.tipo || u.k !== paso.k || u.p !== paso.p) estado.recorrido.push(paso);
+    if (estado.recorrido.length > 40) estado.recorrido.shift();
+  }
+  function hash() {
+    const h = estado.sel.tipo === "p" ? `${estado.t}-p${estado.sel.k.replace(":", "-")}` : `${estado.t}-l${estado.sel.p || L.segmentos[estado.sel.seg].ini}`;
+    try { history.replaceState(null, "", "#" + h); } catch (e) { /* sin historial */ }
+  }
+  function irP(k) {
+    if (!D.pasajes[k]) return;
+    estado.sel = { tipo: "p", k };
+    anotar({ tipo: "p", k });
+    hash(); render();
+  }
+  function irL(p, segI) {
+    if (!L) return;
+    const s = segI !== undefined ? L.segmentos[segI] : segDePagina(p);
+    if (!s) return;
+    const pag = p || s.ini;
+    estado.sel = { tipo: "l", seg: s.i, p: pag };
+    anotar({ tipo: "l", p: pag });
+    hash(); render();
+  }
+
+  // Eventos
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-t]");
+    if (t) { estado.t = t.dataset.t; estado.lente = null; hash(); render(); return; }
+    const l = e.target.closest("#lentes .ficha");
+    if (l) {
+      estado.lente = l.dataset.l || null;
+      prepararTermino();
+      const it = itinerario();
+      if (estado.lente && !(estado.sel.tipo === "p" && it.includes(estado.sel.k)) && it.length) irP(it[0]); else render();
+      return;
+    }
+    const b = e.target.closest("[data-ir]");
+    if (b && !b.disabled) { irP(b.dataset.ir); return; }
+    const pg = e.target.closest("[data-pag]");
+    if (pg) { irL(Number(pg.dataset.pag)); return; }
+    const sg = e.target.closest("[data-seg]");
+    if (sg) { const s = L.segmentos[Number(sg.dataset.seg)]; irL(s.ini, s.i); }
+  });
+  document.addEventListener("mouseover", e => {
+    const b = e.target.closest(".puente");
+    document.querySelectorAll(".mapa .lin").forEach(x => x.classList.toggle("realce", !!b && x.dataset.i === b.dataset.i));
+  });
+  $("orden").addEventListener("change", e => { estado.orden = e.target.value; render(); });
+  $("verRem").addEventListener("change", e => { estado.verRem = e.target.checked; render(); });
+  $("verEco").addEventListener("change", e => { estado.verEco = e.target.checked; render(); });
+  $("verLibro").addEventListener("change", e => { estado.verLibro = e.target.checked; render(); });
+  $("limpiar").addEventListener("click", () => {
+    estado.recorrido = [estado.sel.tipo === "p" ? { tipo: "p", k: estado.sel.k } : { tipo: "l", p: estado.sel.p }];
+    dibujarRecorrido();
+  });
+  document.addEventListener("keydown", e => {
+    if (e.target.closest("input, select, textarea") || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    if (estado.sel.tipo === "p") {
+      const v = vecinos(estado.sel.k), dest = e.key === "ArrowLeft" ? v.prev : v.next;
+      if (dest) { e.preventDefault(); irP(dest); }
+    } else {
+      const h = HOJAS.indexOf(L.segmentos[estado.sel.seg]);
+      const dest = HOJAS[h + (e.key === "ArrowLeft" ? -1 : 1)];
+      if (dest) { e.preventDefault(); irL(dest.ini, dest.i); }
+    }
+  });
+  function desdeHash() {
+    const m = /^#(arete|hen|nous)-(?:p(\d+)-(\w+)|l(\d+))$/.exec(location.hash || "");
+    if (!m) return false;
+    estado.t = m[1];
+    if (m[2] && D.pasajes[m[2] + ":" + m[3]]) estado.sel = { tipo: "p", k: m[2] + ":" + m[3] };
+    else if (m[4] && L && segDePagina(Number(m[4]))) estado.sel = { tipo: "l", seg: segDePagina(Number(m[4])).i, p: Number(m[4]) };
+    return true;
+  }
+  window.addEventListener("hashchange", () => { if (desdeHash()) { anotar(estado.sel.tipo === "p" ? { tipo: "p", k: estado.sel.k } : { tipo: "l", p: estado.sel.p }); render(); } });
+  let espera;
+  new ResizeObserver(() => { clearTimeout(espera); espera = setTimeout(() => { if (T) dibujarMapa(); }, 80); }).observe($("mapa"));
+
+  desdeHash();
+  estado.recorrido = [estado.sel.tipo === "p" ? { tipo: "p", k: estado.sel.k } : { tipo: "l", p: estado.sel.p }];
+  render();
+})();
+</script>
+</body>
+</html>

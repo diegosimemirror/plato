@@ -1,0 +1,3 @@
+# Los textos de Perseus se guardan tal cual (sin conversión de fin de línea),
+# para que coincidan byte a byte con la fuente.
+datos/** -text

@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ἀρετή en Platón</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=GFS+Didot&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif:wght@400;600&display=swap">
+<style>
+/* Diseño: los 36 diálogos como «carruseles» de Perseus apilados; las marcas son las secciones Stephanus con ἀρετή
+   y las curvas, los puentes entre diálogos. Debajo, el pasaje elegido en griego e inglés y sus puentes. */
+:root {
+  --bg: #F4F6F9;
+  --surface: #FFFFFF;
+  --fg: #1A2130;
+  --muted: #5A6375;
+  --line: #DCE1E8;
+  --track: #E3E7ED;
+  --accent: #1F55A5;
+  --accent-soft: #DCE6F5;
+  --remision: #6A3FA0;
+  --eco: #A86400;
+  --mark-dim: #B3BAC6;
+  --font-greek: "GFS Didot", "Noto Serif", "Palatino Linotype", "Palatino", serif;
+  --font-text: "Noto Serif", Georgia, "Times New Roman", serif;
+  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10141B; --surface: #171C25; --fg: #E5E9F0; --muted: #9AA3B3; --line: #29303C;
+    --track: #252C38; --accent: #74A3EA; --accent-soft: #1E2E48; --remision: #B79BE8;
+    --eco: #E2A443; --mark-dim: #4A5364; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10141B; --surface: #171C25; --fg: #E5E9F0; --muted: #9AA3B3; --line: #29303C;
+  --track: #252C38; --accent: #74A3EA; --accent-soft: #1E2E48; --remision: #B79BE8;
+  --eco: #E2A443; --mark-dim: #4A5364; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg); color: var(--fg); font-family: var(--font-ui); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 48px;
+}
+.marco { max-width: 1240px; margin: 0 auto; display: grid; gap: 20px; }
+button, select { font: inherit; color: inherit; }
+button:focus-visible, select:focus-visible, summary:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Encabezado */
+header { display: grid; gap: 6px; }
+.ceja { font-family: var(--font-data); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-family: var(--font-greek); font-weight: 400; font-size: clamp(40px, 7vw, 64px); line-height: 1; text-wrap: balance; }
+h1 small { font-family: var(--font-ui); font-size: clamp(16px, 2.2vw, 20px); color: var(--muted); font-weight: 400; margin-left: 10px; }
+.cifras { display: flex; flex-wrap: wrap; gap: 4px 18px; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; }
+.cifras b { color: var(--fg); font-weight: 600; }
+.intro { max-width: 70ch; margin: 4px 0 0; color: var(--muted); }
+
+/* Controles */
+.controles { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-start; }
+.grupo-ctl { display: grid; gap: 6px; min-width: 0; }
+.etq { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.fichas { display: flex; flex-wrap: wrap; gap: 6px; }
+.ficha {
+  border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 3px 11px;
+  font-size: 13px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center;
+}
+.ficha[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.ficha .n { font-family: var(--font-data); font-size: 11px; opacity: .75; }
+.interruptor { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; cursor: pointer; }
+.muestra { width: 22px; height: 0; border-top: 2px solid var(--remision); display: inline-block; }
+.muestra.eco { border-top: 2px dashed var(--eco); }
+
+/* Mapa de carruseles */
+.mapa { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 12px 8px; position: relative; }
+.mapa svg { display: block; width: 100%; height: auto; cursor: pointer; user-select: none; }
+.mapa text { font-family: var(--font-ui); fill: var(--fg); }
+.mapa .grp { font-family: var(--font-data); font-size: 10.5px; letter-spacing: .08em; fill: var(--muted); text-transform: uppercase; }
+.mapa .lbl { font-size: 12.5px; }
+.mapa .lbl.vacio, .mapa .num.vacio { fill: var(--mark-dim); }
+.mapa .num { font-family: var(--font-data); font-size: 11px; fill: var(--muted); }
+.mapa .pista { fill: var(--track); }
+.mapa .marca { fill: var(--accent); }
+.mapa .marca.apagada { fill: var(--mark-dim); }
+.mapa .sel { fill: none; stroke: var(--fg); stroke-width: 2; }
+.mapa .lin { fill: none; stroke-width: 1.6; pointer-events: none; }
+.mapa .lin.remision { stroke: var(--remision); }
+.mapa .lin.eco { stroke: var(--eco); stroke-dasharray: 5 4; }
+.mapa .lin.realce { stroke-width: 3; }
+.mapa .destino { fill: var(--surface); stroke-width: 2; }
+.mapa .destino.remision { stroke: var(--remision); }
+.mapa .destino.eco { stroke: var(--eco); }
+.leyenda { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--muted); padding: 8px 2px 2px; }
+.leyenda span { display: inline-flex; gap: 6px; align-items: center; }
+.cuadro { width: 10px; height: 12px; background: var(--accent); display: inline-block; border-radius: 1px; }
+.globo {
+  position: absolute; pointer-events: none; background: var(--fg); color: var(--bg); font-size: 12.5px;
+  padding: 4px 8px; border-radius: 4px; white-space: nowrap; transform: translate(-50%, -130%);
+}
+
+/* Lector */
+.lector { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .lector { grid-template-columns: minmax(0, 1fr); } }
+.pasaje { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.cab { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; justify-content: space-between; }
+.cab h2 { margin: 0; font-size: 22px; font-weight: 600; text-wrap: balance; }
+.cab h2 .steph { font-family: var(--font-data); font-weight: 500; color: var(--accent); margin-left: 6px; }
+.cab .k { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.navs { display: grid; gap: 6px; }
+.nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13.5px; }
+.nav .que { color: var(--muted); min-width: 0; }
+.btn {
+  border: 1px solid var(--line); background: var(--bg); border-radius: 4px; padding: 3px 10px; cursor: pointer;
+  font-size: 13px; display: inline-flex; gap: 6px; align-items: center;
+}
+.btn:hover:not(:disabled) { border-color: var(--accent); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn .steph { font-family: var(--font-data); }
+.textos { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 700px) { .textos { grid-template-columns: minmax(0, 1fr); } }
+.texto { display: grid; gap: 6px; min-width: 0; align-content: start; }
+.texto .etq { font-weight: 500; }
+.gr { font-family: var(--font-greek); font-size: 18px; line-height: 1.65; margin: 0; overflow-wrap: anywhere; }
+.en { font-family: var(--font-text); font-size: 15px; line-height: 1.7; margin: 0; overflow-wrap: anywhere; }
+mark { background: var(--accent-soft); color: var(--fg); border-bottom: 2px solid var(--accent); padding: 0 1px; }
+.en mark { border-bottom-style: dotted; }
+.hablante { font-family: var(--font-data); font-size: 11px; letter-spacing: .05em; color: var(--muted); margin-right: 4px; }
+.aviso { font-size: 13.5px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; margin: 0; }
+
+.lateral { display: grid; gap: 16px; min-width: 0; }
+.caja { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.caja h3 { margin: 0; font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.caja h3 .n { font-family: var(--font-data); font-weight: 400; color: var(--muted); }
+.puentes { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.puente {
+  border: 1px solid var(--line); border-left: 3px solid var(--remision); border-radius: 4px; padding: 8px 10px;
+  display: grid; gap: 4px; cursor: pointer; background: var(--surface); text-align: left; width: 100%;
+}
+.puente.eco { border-left: 3px dashed var(--eco); }
+.puente:hover, .puente:focus-visible { border-color: var(--accent); }
+.puente .dest { font-weight: 600; font-size: 14px; }
+.puente .dest .steph { font-family: var(--font-data); font-weight: 500; color: var(--accent); }
+.puente .dir { font-size: 12px; color: var(--muted); }
+.puente .nota { font-family: var(--font-text); font-size: 13px; line-height: 1.5; color: var(--fg); overflow-wrap: anywhere; }
+.puente .nota.gram { color: var(--muted); }
+.palabras { display: flex; flex-wrap: wrap; gap: 4px; }
+.palabras span { font-family: var(--font-greek); font-size: 15px; background: var(--bg); border: 1px solid var(--line); border-radius: 3px; padding: 0 6px; }
+.vacio-msg { font-size: 13.5px; color: var(--muted); margin: 0; }
+.recorrido { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.recorrido .paso { font-size: 12.5px; padding: 2px 8px; }
+.recorrido .paso.actual { border-color: var(--accent); color: var(--accent); }
+.recorrido .flecha { color: var(--muted); font-size: 12px; }
+
+/* Método */
+.metodo { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 18px; }
+.metodo summary { cursor: pointer; font-weight: 600; }
+.metodo .cuerpo { display: grid; gap: 8px; max-width: 80ch; padding-top: 8px; color: var(--fg); font-size: 14px; }
+.metodo p { margin: 0; }
+.metodo ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.metodo code { font-family: var(--font-data); font-size: 12.5px; }
+.metodo .gr-in { font-family: var(--font-greek); font-size: 15px; }
+@media (prefers-reduced-motion: no-preference) { .puente, .btn, .ficha { transition: border-color .15s, background .15s; } }
+</style>
+</head>
+<body>
+
+<div class="marco">
+  <header>
+    <div class="ceja">Proyecto Platón · concordancia</div>
+    <h1>Ἀρετή <small>en los diálogos de Platón</small></h1>
+    <div class="cifras" id="cifras"></div>
+    <p class="intro">Cada barra es un diálogo, de principio a fin, según la paginación de Stephanus. Las marcas azules son las secciones donde aparece ἀρετή. Elige una marca para leer el pasaje en griego y en inglés y ver con qué pasajes de otros diálogos se conecta. Puedes leer obra por obra o saltar de diálogo en diálogo siguiendo los puentes, y tu recorrido queda anotado.</p>
+  </header>
+
+  <section class="controles" aria-label="Controles del mapa">
+    <div class="grupo-ctl">
+      <label class="etq" for="orden">Orden de los diálogos</label>
+      <select id="orden">
+        <option value="trasilo">Tetralogías de Trasilo</option>
+        <option value="crono">Cronología convencional (aproximada)</option>
+      </select>
+    </div>
+    <div class="grupo-ctl">
+      <span class="etq">Puentes</span>
+      <div class="fichas">
+        <label class="interruptor"><input type="checkbox" id="verRem" checked> <span class="muestra"></span> Remisiones de los traductores</label>
+        <label class="interruptor"><input type="checkbox" id="verEco" checked> <span class="muestra eco"></span> Ecos de vocabulario</label>
+      </div>
+    </div>
+    <div class="grupo-ctl" style="flex-basis:100%">
+      <span class="etq">Lente: ¿con qué aparece ἀρετή?</span>
+      <div class="fichas" id="lentes"></div>
+    </div>
+  </section>
+
+  <section class="mapa" id="mapa" aria-label="Mapa de los diálogos">
+    <svg id="svg" role="img" aria-label="Secciones con ἀρετή en cada diálogo y puentes del pasaje elegido"></svg>
+    <div class="leyenda">
+      <span><i class="cuadro"></i> sección con ἀρετή (más intensa, más apariciones)</span>
+      <span><i class="muestra"></i> remisión de un traductor</span>
+      <span><i class="muestra eco"></i> eco de vocabulario</span>
+      <span>Flechas ← → del teclado: pasaje anterior o siguiente del mismo diálogo</span>
+    </div>
+    <div class="globo" id="globo" hidden></div>
+  </section>
+
+  <section class="lector">
+    <article class="pasaje" id="pasaje" aria-live="polite"></article>
+    <aside class="lateral">
+      <div class="caja">
+        <h3>Puentes de este pasaje <span class="n" id="nPuentes"></span></h3>
+        <ul class="puentes" id="puentes"></ul>
+      </div>
+      <div class="caja">
+        <h3>Tu recorrido <button class="btn" id="limpiar" type="button">Empezar de nuevo</button></h3>
+        <div class="recorrido" id="recorrido"></div>
+      </div>
+    </aside>
+  </section>
+
+  <details class="metodo">
+    <summary>Cómo se armó esta concordancia</summary>
+    <div class="cuerpo">
+      <p><b>Textos.</b> Griego de la edición de Burnet (Oxford) e inglés de la Loeb Classical Library (Fowler, Lamb, Shorey, Bury), tomados de Perseus Digital Library y alineados por sección Stephanus. Licencia CC BY-SA 4.0, © Perseus Digital Library, Tufts University.</p>
+      <p><b>Apariciones.</b> Se cuentan las formas del sustantivo <span class="gr-in">ἀρετή</span> (<span class="gr-in">ἀρετή, ἀρετῆς, ἀρετῇ, ἀρετήν, ἀρεταί, ἀρετῶν, ἀρεταῖς, ἀρετάς</span>) sin distinguir acentos. En inglés se resaltan <i>virtue</i>, <i>excellence</i> y <i>goodness</i> solo como ayuda para ubicar la traducción.</p>
+      <ul>
+        <li><b>Remisiones.</b> Pasajes que un traductor Loeb cita en sus notas, sobre todo Shorey en la <i>República</i> y Bury en las <i>Leyes</i>. Se leen las abreviaturas habituales (<code>Meno 71 B</code>, <code>Gorg. 448 E</code>, <code>Cf. 113 E</code>) y se conservan las que llegan a una sección existente y tocan un pasaje con ἀρετή en alguno de sus extremos. Algunas notas son gramaticales y aparecen en gris.</li>
+        <li><b>Ecos de vocabulario.</b> Cálculo automático entre pasajes con ἀρετή de diálogos distintos: similitud coseno TF-IDF sobre raíces aproximadas (sin lematizador), con umbral 0,10 y como máximo los tres ecos más fuertes de cada pasaje. Cada eco muestra las palabras compartidas que más pesan.</li>
+        <li><b>Lentes.</b> Marcan las secciones donde ἀρετή aparece junto a ciertas raíces, por ejemplo <span class="gr-in">διδακ-, μανθαν-, ἀσκ-</span> para «¿Se enseña?».</li>
+        <li><b>Cronología.</b> La agrupación en tempranos, medios y tardíos es la convencional y está en discusión. Los diálogos de autoría discutida van aparte.</li>
+      </ul>
+      <p>Los puentes calculados son pistas para la lectura y no sustituyen la interpretación.</p>
+    </div>
+  </details>
+</div>
+
+<script src="arete_datos.js"></script>
+<script>
+(function () {
+  const D = window.DATOS;
+  const NS = "http://www.w3.org/2000/svg";
+  const TETRA = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
+
+  // Índices de apoyo
+  const OBRA = {};
+  D.obras.forEach(o => {
+    OBRA[o.n] = o;
+    o.idx = new Map(o.secciones.map((s, i) => [s, i]));
+    o.arete = o.secciones.filter(s => (D.pasajes[o.n + ":" + s] || {}).k > 0);
+  });
+  const PUENTES = {};
+  const agregar = (k, v) => (PUENTES[k] = PUENTES[k] || []).push(v);
+  D.puentes.forEach(p => {
+    agregar(p.de, Object.assign({}, p, { otro: p.a, dir: "sale" }));
+    agregar(p.a, Object.assign({}, p, { otro: p.de, dir: "entra" }));
+  });
+  const totalK = D.obras.reduce((a, o) => a + o.k, 0);
+  const nPasajes = Object.values(D.pasajes).filter(p => p.k > 0).length;
+  const nObras = D.obras.filter(o => o.k > 0).length;
+  const nRem = D.puentes.filter(p => p.tipo === "remision").length;
+  const nEco = D.puentes.length - nRem;
+
+  const estado = { sel: "24:70a", lente: null, orden: "trasilo", verRem: true, verEco: true, recorrido: [] };
+  let geo = null; // geometría del último dibujo
+
+  const $ = id => document.getElementById(id);
+  const esc = t => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const norm = w => w.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/ς/g, "σ");
+  const FORMAS = new Set(["αρετη", "αρετησ", "αρετην", "αρεται", "αρετων", "αρεταισ", "αρετασ"]);
+  const partes = k => { const i = k.indexOf(":"); return [Number(k.slice(0, i)), k.slice(i + 1)]; };
+  const nombre = k => { const [n, s] = partes(k); return OBRA[n].es + " " + s; };
+  const fmt = n => n.toLocaleString("es-PE");
+
+  $("cifras").innerHTML =
+    `<span><b>${fmt(totalK)}</b> apariciones</span><span><b>${fmt(nPasajes)}</b> secciones</span>` +
+    `<span><b>${nObras}</b> de 36 diálogos</span><span><b>${fmt(nRem)}</b> remisiones</span><span><b>${fmt(nEco)}</b> ecos</span>`;
+
+  // Filas según el orden elegido
+  function grupos() {
+    if (estado.orden === "crono") {
+      return Object.entries(D.grupos).map(([g, obras]) => ({ g, obras }));
+    }
+    return TETRA.map((t, i) => ({ g: "Tetralogía " + t, obras: [1, 2, 3, 4].map(j => i * 4 + j) }));
+  }
+  function itinerario(lente) {
+    const lista = [];
+    grupos().forEach(gr => gr.obras.forEach(n => OBRA[n].arete.forEach(s => {
+      const k = n + ":" + s;
+      if (!lente || D.pasajes[k].lentes.includes(lente)) lista.push(k);
+    })));
+    return lista;
+  }
+  function puentesVisibles(k) {
+    return (PUENTES[k] || []).filter(p => (p.tipo === "remision" ? estado.verRem : estado.verEco));
+  }
+
+  // Lentes
+  function dibujarLentes() {
+    const cuenta = {};
+    Object.values(D.pasajes).forEach(p => p.lentes.forEach(l => (cuenta[l] = (cuenta[l] || 0) + 1)));
+    const fichas = [`<button type="button" class="ficha" data-l="" aria-pressed="${!estado.lente}">Todas <span class="n">${nPasajes}</span></button>`]
+      .concat(Object.entries(D.lentes).map(([k, t]) =>
+        `<button type="button" class="ficha" data-l="${k}" aria-pressed="${estado.lente === k}">${t} <span class="n">${cuenta[k] || 0}</span></button>`));
+    $("lentes").innerHTML = fichas.join("");
+  }
+  $("lentes").addEventListener("click", e => {
+    const b = e.target.closest(".ficha");
+    if (!b) return;
+    estado.lente = b.dataset.l || null;
+    const itin = itinerario(estado.lente);
+    if (estado.lente && !itin.includes(estado.sel) && itin.length) ir(itin[0]);
+    else render();
+  });
+
+  // Mapa
+  function dibujarMapa() {
+    const svg = $("svg");
+    const W = svg.parentElement.clientWidth - 24;
+    const angosto = W < 640;
+    const labelW = angosto ? 92 : 150, numW = 30;
+    const barX = labelW + 10, barW = Math.max(120, W - barX - numW - 8);
+    const rowH = angosto ? 19 : 21, grpH = 24, pistaH = 8, marcaH = 14;
+    const filas = {};
+    let y = 4;
+    const partesSvg = [];
+    const itinSet = estado.lente ? new Set(itinerario(estado.lente)) : null;
+    grupos().forEach(gr => {
+      y += grpH;
+      partesSvg.push(`<text class="grp" x="0" y="${y - 7}">${gr.g}</text>`);
+      gr.obras.forEach(n => {
+        const o = OBRA[n];
+        const cy = y + rowH / 2;
+        filas[n] = cy;
+        const vacio = o.k === 0 ? " vacio" : "";
+        let nom = o.es;
+        if (angosto && nom.length > 13) nom = nom.slice(0, 12) + "…";
+        partesSvg.push(`<text class="lbl${vacio}" x="${labelW}" y="${cy + 4}" text-anchor="end">${nom}</text>`);
+        partesSvg.push(`<rect class="pista" x="${barX}" y="${cy - pistaH / 2}" width="${barW}" height="${pistaH}" rx="2"></rect>`);
+        const len = o.secciones.length, w = Math.max(2, barW / len);
+        o.arete.forEach(s => {
+          const k = n + ":" + s, p = D.pasajes[k];
+          const x = barX + (o.idx.get(s) + 0.5) / len * barW;
+          const op = p.k >= 3 ? 1 : p.k === 2 ? 0.8 : 0.58;
+          const apag = itinSet && !itinSet.has(k) ? " apagada" : "";
+          partesSvg.push(`<rect class="marca${apag}" x="${(x - w / 2).toFixed(1)}" y="${cy - marcaH / 2}" width="${w.toFixed(1)}" height="${marcaH}" opacity="${apag ? 1 : op}"></rect>`);
+        });
+        partesSvg.push(`<text class="num${vacio}" x="${barX + barW + 6}" y="${cy + 4}">${o.k}</text>`);
+        y += rowH;
+      });
+    });
+    const H = y + 6;
+    const xDe = k => { const [n, s] = partes(k); const o = OBRA[n]; return barX + (o.idx.get(s) + 0.5) / o.secciones.length * barW; };
+
+    // Puentes del pasaje elegido
+    const [ns] = partes(estado.sel);
+    const x1 = xDe(estado.sel), y1 = filas[ns];
+    const destinos = [];
+    puentesVisibles(estado.sel).forEach((p, i) => {
+      const [n2] = partes(p.otro);
+      const x2 = xDe(p.otro), y2 = filas[n2];
+      let d;
+      if (n2 === ns) {
+        const alto = Math.min(40, 14 + Math.abs(x2 - x1) / 6);
+        d = `M${x1.toFixed(1)} ${y1} C${x1.toFixed(1)} ${y1 - alto} ${x2.toFixed(1)} ${y2 - alto} ${x2.toFixed(1)} ${y2}`;
+      } else {
+        const ym = (y1 + y2) / 2;
+        d = `M${x1.toFixed(1)} ${y1} C${x1.toFixed(1)} ${ym} ${x2.toFixed(1)} ${ym} ${x2.toFixed(1)} ${y2}`;
+      }
+      partesSvg.push(`<path class="lin ${p.tipo}" data-i="${i}" d="${d}"></path>`);
+      destinos.push({ k: p.otro, x: x2, y: y2, tipo: p.tipo });
+    });
+    destinos.forEach(t => partesSvg.push(`<circle class="destino ${t.tipo}" cx="${t.x.toFixed(1)}" cy="${t.y}" r="4"></circle>`));
+    partesSvg.push(`<rect class="sel" x="${(x1 - 5).toFixed(1)}" y="${y1 - 11}" width="10" height="22" rx="2"></rect>`);
+
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.setAttribute("width", W);
+    svg.setAttribute("height", H);
+    svg.innerHTML = partesSvg.join("");
+    geo = { W, barX, barW, rowH, filas, destinos };
+  }
+
+  function buscarEn(ev) {
+    if (!geo) return null;
+    const r = $("svg").getBoundingClientRect();
+    const x = (ev.clientX - r.left) * geo.W / r.width;
+    const y = (ev.clientY - r.top) * geo.W / r.width;
+    for (const t of geo.destinos) if (Math.hypot(t.x - x, t.y - y) < 9) return t.k;
+    let fila = null;
+    for (const [n, cy] of Object.entries(geo.filas)) if (Math.abs(cy - y) <= geo.rowH / 2) fila = Number(n);
+    if (fila === null) return null;
+    const o = OBRA[fila];
+    let mejor = null, dist = 14;
+    o.arete.forEach(s => {
+      const xs = geo.barX + (o.idx.get(s) + 0.5) / o.secciones.length * geo.barW;
+      const d = Math.abs(xs - x);
+      if (d < dist) { dist = d; mejor = fila + ":" + s; }
+    });
+    return mejor;
+  }
+  $("svg").addEventListener("click", ev => { const k = buscarEn(ev); if (k) ir(k); });
+  $("svg").addEventListener("mousemove", ev => {
+    const k = buscarEn(ev), g = $("globo");
+    if (!k) { g.hidden = true; return; }
+    const p = D.pasajes[k];
+    g.textContent = nombre(k) + (p.k ? ` · ${p.k} ${p.k === 1 ? "aparición" : "apariciones"}` : " · sin ἀρετή");
+    const r = $("mapa").getBoundingClientRect();
+    g.style.left = (ev.clientX - r.left) + "px";
+    g.style.top = (ev.clientY - r.top) + "px";
+    g.hidden = false;
+  });
+  $("svg").addEventListener("mouseleave", () => ($("globo").hidden = true));
+
+  // Texto del pasaje
+  function griego(t) {
+    return esc(t)
+      .replace(/\[([^\]]+)\]/g, '<span class="hablante">$1</span>')
+      .replace(/[Ͱ-Ͽἀ-῿]+/g, w => (FORMAS.has(norm(w)) ? `<mark>${w}</mark>` : w));
+  }
+  function ingles(t) {
+    return esc(t)
+      .replace(/\[([^\]]+)\]/g, '<span class="hablante">$1</span>')
+      .replace(/\b(virtues?|virtuous|excellence|goodness)\b/gi, "<mark>$1</mark>");
+  }
+  function botonPaso(k, txt, flecha) {
+    if (!k) return `<button class="btn" type="button" disabled>${flecha === "izq" ? "◀" : ""}${txt}${flecha === "der" ? "▶" : ""}</button>`;
+    const [, s] = partes(k);
+    const etiqueta = txt === null ? `<span class="steph">${s}</span>` : `${esc(nombre(k).replace(/ \S+$/, ""))} <span class="steph">${s}</span>`;
+    return `<button class="btn" type="button" data-ir="${k}">${flecha === "izq" ? "◀ " : ""}${etiqueta}${flecha === "der" ? " ▶" : ""}</button>`;
+  }
+  function vecinosEnObra(k) {
+    const [n, s] = partes(k), o = OBRA[n];
+    let i = o.arete.indexOf(s);
+    if (i >= 0) return { prev: i > 0 ? n + ":" + o.arete[i - 1] : null, next: i < o.arete.length - 1 ? n + ":" + o.arete[i + 1] : null, pos: i + 1, tot: o.arete.length };
+    const pos = o.idx.get(s);
+    const antes = o.arete.filter(x => o.idx.get(x) < pos), despues = o.arete.filter(x => o.idx.get(x) > pos);
+    return { prev: antes.length ? n + ":" + antes[antes.length - 1] : null, next: despues.length ? n + ":" + despues[0] : null, pos: null, tot: o.arete.length };
+  }
+  function dibujarPasaje() {
+    const k = estado.sel, [n, s] = partes(k), o = OBRA[n], p = D.pasajes[k];
+    const v = vecinosEnObra(k);
+    let navs = `<div class="nav"><span class="que">Obra por obra · ${esc(o.es)}${v.pos ? ` (${v.pos} de ${v.tot})` : ""}</span>${botonPaso(v.prev, null, "izq")}${botonPaso(v.next, null, "der")}</div>`;
+    if (estado.lente) {
+      const it = itinerario(estado.lente), j = it.indexOf(k);
+      navs += `<div class="nav"><span class="que">Rayuela por la lente «${esc(D.lentes[estado.lente])}»${j >= 0 ? ` (${j + 1} de ${it.length})` : ""}</span>` +
+        botonPaso(j > 0 ? it[j - 1] : null, "", "izq") + botonPaso(j >= 0 && j < it.length - 1 ? it[j + 1] : null, "", "der") + `</div>`;
+    }
+    const lentes = p.lentes.length
+      ? `<div class="fichas">${p.lentes.map(l => `<span class="ficha" style="cursor:default">${esc(D.lentes[l])}</span>`).join("")}</div>` : "";
+    const aviso = p.k === 0 ? `<p class="aviso">Esta sección no contiene ἀρετή. Llegaste por una remisión de un traductor.</p>` : "";
+    $("pasaje").innerHTML =
+      `<div class="cab"><h2>${esc(o.es)}<span class="steph">${esc(s)}</span></h2>` +
+      `<span class="k">${p.k ? `${p.k} ${p.k === 1 ? "aparición" : "apariciones"} de ἀρετή` : "sin ἀρετή"}</span></div>` +
+      `<div class="navs">${navs}</div>${lentes}${aviso}` +
+      `<div class="textos"><div class="texto" lang="grc"><span class="etq">Griego · Burnet</span><p class="gr">${griego(p.gr)}</p></div>` +
+      `<div class="texto" lang="en"><span class="etq">Inglés · Loeb</span><p class="en">${p.en ? ingles(p.en) : "<i>Sin traducción para esta sección.</i>"}</p></div></div>`;
+  }
+
+  // Puentes y recorrido
+  function dibujarPuentes() {
+    const lista = puentesVisibles(estado.sel).map((p, i) => Object.assign({ i }, p));
+    const gram = t => /^[Ͱ-Ͽἀ-῿]/.test(t);
+    lista.sort((a, b) => (a.tipo !== b.tipo ? (a.tipo === "remision" ? -1 : 1)
+      : a.tipo === "remision" ? (gram(a.nota) - gram(b.nota)) : (b.fuerza - a.fuerza)));
+    $("nPuentes").textContent = lista.length;
+    if (!lista.length) {
+      $("puentes").innerHTML = `<li class="vacio-msg">Este pasaje no tiene puentes con los filtros actuales. Prueba con un pasaje del Menón, el Protágoras o la República.</li>`;
+      return;
+    }
+    $("puentes").innerHTML = lista.map(p => {
+      const [, s2] = partes(p.otro), dest = `${esc(nombre(p.otro).replace(/ \S+$/, ""))} <span class="steph">${esc(s2)}</span>`;
+      if (p.tipo === "remision") {
+        const dir = p.dir === "sale" ? "La nota de este pasaje remite a" : "Una nota en ese pasaje remite aquí";
+        const nota = p.nota.length > 260 ? p.nota.slice(0, 257) + "…" : p.nota;
+        return `<li><button type="button" class="puente" data-ir="${p.otro}" data-i="${p.i}"><span class="dir">${dir}</span><span class="dest">${dest}</span><span class="nota${gram(p.nota) ? " gram" : ""}">${esc(nota)}</span></button></li>`;
+      }
+      return `<li><button type="button" class="puente eco" data-ir="${p.otro}" data-i="${p.i}"><span class="dir">Eco de vocabulario · fuerza ${p.fuerza.toFixed(2).replace(".", ",")}</span><span class="dest">${dest}</span><span class="palabras">${p.palabras.map(w => `<span>${esc(w)}</span>`).join("")}</span></button></li>`;
+    }).join("");
+  }
+  function dibujarRecorrido() {
+    $("recorrido").innerHTML = estado.recorrido.map((k, i) =>
+      (i ? `<span class="flecha">→</span>` : "") +
+      `<button type="button" class="btn paso${k === estado.sel ? " actual" : ""}" data-ir="${k}">${esc(nombre(k))}</button>`).join("");
+  }
+
+  // Navegación general
+  function render() {
+    dibujarLentes();
+    dibujarMapa();
+    dibujarPasaje();
+    dibujarPuentes();
+    dibujarRecorrido();
+  }
+  function ir(k) {
+    if (!D.pasajes[k]) return;
+    estado.sel = k;
+    if (estado.recorrido[estado.recorrido.length - 1] !== k) estado.recorrido.push(k);
+    if (estado.recorrido.length > 40) estado.recorrido.shift();
+    const [n, s] = partes(k);
+    try { history.replaceState(null, "", "#p" + n + "-" + s); } catch (e) { /* sin historial */ }
+    render();
+  }
+  document.addEventListener("click", e => {
+    const b = e.target.closest("[data-ir]");
+    if (b && !b.disabled) ir(b.dataset.ir);
+  });
+  $("puentes").addEventListener("mouseover", e => {
+    const b = e.target.closest(".puente");
+    document.querySelectorAll(".mapa .lin").forEach(l => l.classList.toggle("realce", !!b && l.dataset.i === b.dataset.i));
+  });
+  $("puentes").addEventListener("mouseleave", () => document.querySelectorAll(".mapa .lin").forEach(l => l.classList.remove("realce")));
+  $("orden").addEventListener("change", e => { estado.orden = e.target.value; render(); });
+  $("verRem").addEventListener("change", e => { estado.verRem = e.target.checked; render(); });
+  $("verEco").addEventListener("change", e => { estado.verEco = e.target.checked; render(); });
+  $("limpiar").addEventListener("click", () => { estado.recorrido = [estado.sel]; dibujarRecorrido(); });
+  document.addEventListener("keydown", e => {
+    if (e.target.closest("input, select, textarea") || e.altKey || e.ctrlKey || e.metaKey) return;
+    const v = vecinosEnObra(estado.sel);
+    if (e.key === "ArrowLeft" && v.prev) { e.preventDefault(); ir(v.prev); }
+    if (e.key === "ArrowRight" && v.next) { e.preventDefault(); ir(v.next); }
+  });
+  function desdeHash() {
+    const m = /^#p(\d+)-(\w+)$/.exec(location.hash || "");
+    return m && D.pasajes[m[1] + ":" + m[2]] ? m[1] + ":" + m[2] : null;
+  }
+  window.addEventListener("hashchange", () => { const k = desdeHash(); if (k && k !== estado.sel) ir(k); });
+  let espera;
+  new ResizeObserver(() => { clearTimeout(espera); espera = setTimeout(dibujarMapa, 80); }).observe($("mapa"));
+
+  const inicial = desdeHash() || "24:70a";
+  estado.sel = inicial;
+  estado.recorrido = [inicial];
+  render();
+})();
+</script>
+</body>
+</html>
